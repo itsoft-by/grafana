@@ -108,6 +108,10 @@ export class QueryVariableEditorUnConnected extends PureComponent<Props, State> 
     this.props.onPropChange({ propName: 'sort', propValue: parseInt(event.target.value, 10), updateOptions: true });
   };
 
+  onRememberCustomOrderChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    this.props.onPropChange({ propName: 'rememberCustomOrder', propValue: event.target.checked, updateOptions: true });
+  };
+
   onSelectionOptionsChange = async ({ propValue, propName }: OnPropChangeArguments<VariableWithMultiSupport>) => {
     this.props.onPropChange({ propName, propValue, updateOptions: true });
   };
@@ -236,6 +240,17 @@ export class QueryVariableEditorUnConnected extends PureComponent<Props, State> 
                 </option>
               </select>
             </div>
+          </div>
+          <div className="gf-form max-width-21">
+            <InlineFormLabel width={10} tooltip={'Remember custom order'}>
+              Custom order
+            </InlineFormLabel>
+            <Switch
+              label="Enabled"
+              label-class="width-10"
+              checked={this.props.variable.rememberCustomOrder}
+              onChange={this.onRememberCustomOrderChange}
+            />
           </div>
         </div>
 
