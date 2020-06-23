@@ -1,4 +1,4 @@
-import { AppEvents, DataSourcePluginMeta, DataSourceSelectItem } from '@grafana/data';
+import { AppEvents, DataSourcePluginMeta, DataSourceSelectItem, MetricFindValue } from '@grafana/data';
 import { validateVariableSelectionState } from '../state/actions';
 import { QueryVariableModel, VariableRefresh } from '../types';
 import { ThunkResult } from '../../../types';
@@ -36,12 +36,28 @@ export const updateQueryVariableOptions = (
         return;
       }
 
-      const results = await dataSource.metricFindQuery(variableInState.query, queryOptions);
+      let results = await dataSource.metricFindQuery(variableInState.query, queryOptions);
 
       const afterUid = getState().templating.transaction.uid;
       if (beforeUid !== afterUid) {
         // we started another batch before this metricFindQuery finished let's abort
         return;
+      }
+
+      console.log(results);
+      if (variableInState.rememberCustomOrder) {
+        if (variableInState.customOrderValues.length > 0) {
+          const knownValues: MetricFindValue[] = [];
+          for (let i = 0; i < variableInState.customOrderValues.length; i++) {
+            const elementToAdd = results.find(x => x.text === variableInState.customOrderValues[i]);
+            if (elementToAdd) {
+              knownValues.push(elementToAdd);
+            }
+          }
+          const unknownValues = results.filter(x => knownValues.indexOf(x) === -1);
+          results = [...knownValues, ...unknownValues];
+          console.log(results);
+        }
       }
 
       const templatedRegex = getTemplatedRegex(variableInState);

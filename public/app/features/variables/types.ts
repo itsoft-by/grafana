@@ -74,6 +74,7 @@ export interface QueryVariableModel extends DataSourceVariableModel {
   useTags: boolean;
   queryValue?: string;
   rememberCustomOrder: boolean;
+  customOrderValues: string[];
 }
 
 export interface TextBoxVariableModel extends VariableWithOptions {}

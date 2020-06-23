@@ -112,6 +112,11 @@ export class QueryVariableEditorUnConnected extends PureComponent<Props, State> 
     this.props.onPropChange({ propName: 'rememberCustomOrder', propValue: event.target.checked, updateOptions: true });
   };
 
+  onCustomOrderValuesChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const values = event.target.value.split(',');
+    this.props.onPropChange({ propName: 'customOrderValues', propValue: values, updateOptions: true });
+  };
+
   onSelectionOptionsChange = async ({ propValue, propName }: OnPropChangeArguments<VariableWithMultiSupport>) => {
     this.props.onPropChange({ propName, propValue, updateOptions: true });
   };
@@ -252,6 +257,20 @@ export class QueryVariableEditorUnConnected extends PureComponent<Props, State> 
               onChange={this.onRememberCustomOrderChange}
             />
           </div>
+          {this.props.variable.rememberCustomOrder && (
+            <div className="gf-form">
+              <InlineFormLabel width={10} tooltip={'Custom order values'}>
+                Order values
+              </InlineFormLabel>
+              <input
+                type="text"
+                className="gf-form-input"
+                placeholder="project1,project2,project3"
+                value={this.props.variable.customOrderValues.join(',')}
+                onChange={this.onCustomOrderValuesChange}
+              />
+            </div>
+          )}
         </div>
 
         <SelectionOptionsEditor

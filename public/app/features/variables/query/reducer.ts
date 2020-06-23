@@ -54,6 +54,7 @@ export const initialQueryVariableModelState: QueryVariableModel = {
   definition: '',
   initLock: null,
   rememberCustomOrder: false,
+  customOrderValues: [],
 };
 
 const sortVariableValues = (options: any[], sortOrder: VariableSort) => {
