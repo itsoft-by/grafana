@@ -17,6 +17,10 @@ import { DashboardModel, PanelModel } from '../state';
 import { CoreEvents } from 'app/types';
 import { panelAdded, panelRemoved } from '../state/PanelModel';
 
+import { QueryVariableModel } from 'app/features/variables/types';
+import { changeQueryVariableCustomOrderProp } from 'app/features/variables/query/actions';
+import { dispatch } from 'app/store/store';
+
 let lastGridWidth = 1200;
 let ignoreNextWidthChange = false;
 
@@ -178,7 +182,21 @@ export class DashboardGrid extends PureComponent<Props> {
     }
   };
 
-  updateGridPos = (item: ReactGridLayout.Layout, layout: ReactGridLayout.Layout[]) => {
+  updateGridPos = async (item: ReactGridLayout.Layout, layout: ReactGridLayout.Layout[]) => {
+    const movedPanelModel = this.props.dashboard.panels.find(x => x.id.toString() === item.i);
+    // if panel is repeating or is copy of repeating
+    if (movedPanelModel.repeat || movedPanelModel.repeatPanelId) {
+      let repeatingVariableName =
+        movedPanelModel.repeat || this.props.dashboard.panels.find(x => x.id === movedPanelModel.repeatPanelId).repeat;
+      const variable = this.props.dashboard.templating.list.find(
+        x => x.name === repeatingVariableName
+      ) as QueryVariableModel;
+      if (variable.rememberCustomOrder) {
+        dispatch(
+          changeQueryVariableCustomOrderProp({ id: repeatingVariableName, type: 'query' }, ['BAS', 'LOL', 'project_4'])
+        );
+      }
+    }
     this.panelMap[item.i!].updateGridPos(item);
 
     // react-grid-layout has a bug (#670), and onLayoutChange() is only called when the component is mounted.

@@ -139,6 +139,17 @@ export const changeQueryVariableQuery = (
   await variableAdapters.get(identifier.type).updateOptions(variableInState);
 };
 
+export const changeQueryVariableCustomOrderProp = (
+  identifier: VariableIdentifier,
+  customOrder: string[]
+): ThunkResult<void> => async (dispatch, getState) => {
+  const variableInState = getVariable<QueryVariableModel>(identifier.id, getState());
+  dispatch(
+    changeVariableProp(toVariablePayload(identifier, { propName: 'customOrderValues', propValue: customOrder }))
+  );
+  await variableAdapters.get(identifier.type).updateOptions(variableInState);
+};
+
 const getTemplatedRegex = (variable: QueryVariableModel): string => {
   if (!variable) {
     return '';
