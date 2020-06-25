@@ -36,6 +36,11 @@ export const updateQueryVariableOptions = (
       }
 
       const results = await dataSource.metricFindQuery(variableInState.query, queryOptions);
+
+      if (variableInState.rememberCustomOrder) {
+        // TODO save to local storage
+      }
+
       const templatedRegex = getTemplatedRegex(variableInState);
       await dispatch(updateVariableOptions(toVariablePayload(variableInState, { results, templatedRegex })));
 
