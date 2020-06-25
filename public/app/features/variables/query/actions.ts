@@ -44,7 +44,6 @@ export const updateQueryVariableOptions = (
         return;
       }
 
-      console.log(results);
       if (variableInState.rememberCustomOrder) {
         if (variableInState.customOrderValues.length > 0) {
           const knownValues: MetricFindValue[] = [];
@@ -56,7 +55,6 @@ export const updateQueryVariableOptions = (
           }
           const unknownValues = results.filter(x => knownValues.indexOf(x) === -1);
           results = [...knownValues, ...unknownValues];
-          console.log(results);
         }
       }
 
