@@ -17,6 +17,8 @@ import { DashboardModel, PanelModel } from '../state';
 import { CoreEvents } from 'app/types';
 import { panelAdded, panelRemoved } from '../state/PanelModel';
 
+import { QueryVariableModel } from 'app/features/templating/types';
+
 let lastGridWidth = 1200;
 let ignoreNextWidthChange = false;
 
@@ -157,16 +159,49 @@ export class DashboardGrid extends PureComponent<Props> {
     return layout;
   }
 
-  onLayoutChange = (newLayout: ReactGridLayout.Layout[]) => {
+  onLayoutChange = (newLayout: ReactGridLayout.Layout[], movedItem: ReactGridLayout.Layout = null) => {
     for (const newPos of newLayout) {
       this.panelMap[newPos.i!].updateGridPos(newPos);
     }
 
     this.props.dashboard.sortPanelsByGridPos();
 
+    if (movedItem) {
+      // save repeating panel order if needed
+      const dashboard = this.props.dashboard;
+      const movedPanel = dashboard.panels.find(x => x.id.toString() === movedItem.i);
+
+      // check if panel is repeating or is a copy of repeating
+      if (this.isPanelSupportRepeating(movedPanel)) {
+        const varName = this.getPanelRepeatVarName(dashboard, movedPanel);
+        const variable = dashboard.templating.list.find(x => x.name === varName) as QueryVariableModel;
+        // check if we should save custom order
+        if (variable.rememberCustomOrder) {
+          // get all panels with this variable
+          const panelsWithThisVarName = dashboard.panels.filter(
+            x => this.isPanelSupportRepeating(x) && this.getPanelRepeatVarName(dashboard, x) === varName
+          );
+          panelsWithThisVarName.sort((a, b) =>
+            a.gridPos.y === b.gridPos.y ? a.gridPos.x - b.gridPos.x : a.gridPos.y - b.gridPos.y
+          );
+          // save this order
+          const newOrder = panelsWithThisVarName.map(x => x.scopedVars[varName].value);
+          localStorage.setItem('custom-order-var.' + varName, JSON.stringify(newOrder));
+        }
+      }
+    }
+
     // Call render() after any changes.  This is called when the layour loads
     this.forceUpdate();
   };
+
+  private getPanelRepeatVarName(dashboard: DashboardModel, panel: PanelModel): string {
+    return panel.repeat || dashboard.panels.find(x => x.id === panel.repeatPanelId).repeat;
+  }
+
+  private isPanelSupportRepeating(panel: PanelModel) {
+    return panel.repeat || panel.repeatPanelId;
+  }
 
   triggerForceUpdate = () => {
     this.forceUpdate();
@@ -183,7 +218,7 @@ export class DashboardGrid extends PureComponent<Props> {
 
     // react-grid-layout has a bug (#670), and onLayoutChange() is only called when the component is mounted.
     // So it's required to call it explicitly when panel resized or moved to save layout changes.
-    this.onLayoutChange(layout);
+    this.onLayoutChange(layout, item);
   };
 
   onResize: ItemCallback = (layout, oldItem, newItem) => {
