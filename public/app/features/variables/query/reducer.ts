@@ -60,6 +60,7 @@ export const initialQueryVariableModelState: QueryVariableModel = {
   tagValuesQuery: '',
   definition: '',
   initLock: null,
+  rememberCustomOrder: false,
 };
 
 const sortVariableValues = (options: any[], sortOrder: VariableSort) => {

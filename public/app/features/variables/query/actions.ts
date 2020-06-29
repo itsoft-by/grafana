@@ -1,4 +1,4 @@
-import { AppEvents, DataSourcePluginMeta, DataSourceSelectItem } from '@grafana/data';
+import { AppEvents, DataSourcePluginMeta, DataSourceSelectItem, MetricFindValue } from '@grafana/data';
 import { validateVariableSelectionState } from '../state/actions';
 import { QueryVariableModel, VariableRefresh } from '../../templating/types';
 import { ThunkResult } from '../../../types';
@@ -35,7 +35,24 @@ export const updateQueryVariableOptions = (
         return;
       }
 
-      const results = await dataSource.metricFindQuery(variableInState.query, queryOptions);
+      let results = await dataSource.metricFindQuery(variableInState.query, queryOptions);
+
+      if (variableInState.rememberCustomOrder) {
+        const savedOrder = localStorage.getItem('custom-order-var.' + variableInState.name);
+        if (savedOrder) {
+          const knownValues: MetricFindValue[] = [];
+          const savedValues = JSON.parse(savedOrder);
+          for (let i = 0; i < savedValues.length; i++) {
+            const elementToAdd = results.find(x => x.text === savedValues[i]);
+            if (elementToAdd) {
+              knownValues.push(elementToAdd);
+            }
+          }
+          const unknownValues = results.filter(x => knownValues.indexOf(x) === -1);
+          results = [...knownValues, ...unknownValues];
+        }
+      }
+
       const templatedRegex = getTemplatedRegex(variableInState);
       await dispatch(updateVariableOptions(toVariablePayload(variableInState, { results, templatedRegex })));
 

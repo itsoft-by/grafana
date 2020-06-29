@@ -43,6 +43,7 @@ export class QueryVariable implements QueryVariableModel, VariableActions {
   definition: string;
   allValue: string;
   index: number;
+  rememberCustomOrder: boolean;
 
   defaults: QueryVariableModel = {
     type: 'query',
@@ -66,6 +67,7 @@ export class QueryVariable implements QueryVariableModel, VariableActions {
     tagValuesQuery: '',
     definition: '',
     index: -1,
+    rememberCustomOrder: false,
   };
 
   /** @ngInject */

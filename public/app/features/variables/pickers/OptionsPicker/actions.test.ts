@@ -505,6 +505,7 @@ function createVariable(extend?: Partial<QueryVariableModel>): QueryVariableMode
     multi: true,
     includeAll: true,
     ...(extend ?? {}),
+    rememberCustomOrder: false,
   };
 }
 
