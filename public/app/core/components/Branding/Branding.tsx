@@ -38,8 +38,8 @@ export class Branding {
   static LoginBackground = LoginBackground;
   static MenuLogo = MenuLogo;
   static LoginBoxBackground = LoginBoxBackground;
-  static AppTitle = 'Grafana';
-  static LoginTitle = 'Welcome to Grafana';
+  static AppTitle = 'Health Monitor by Topsoft';
+  static LoginTitle = 'Welcome to Health Monitor by Topsoft';
   static GetLoginSubTitle = () => {
     const slogans = [
       "Don't get in the way of the data",
