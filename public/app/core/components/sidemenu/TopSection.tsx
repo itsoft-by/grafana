@@ -5,10 +5,6 @@ import config from '../../config';
 import { getLocationSrv } from '@grafana/runtime';
 import { contextSrv } from 'app/core/services/context_srv';
 
-interface NavItem {
-  id: string;
-}
-
 const TopSection: FC<any> = () => {
   const excludeNavItemIds = ['create', 'dashboards', 'explore', 'alerting', 'admin'];
   const navTree = _.cloneDeep(config.bootData.navTree);
