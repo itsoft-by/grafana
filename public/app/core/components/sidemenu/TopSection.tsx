@@ -21,8 +21,10 @@ const TopSection: FC<any> = () => {
   if (contextSrv.isSignedIn && contextSrv.user.isGrafanaAdmin === true) {
     const cfg = _.find(mainLinks, x => x.id === 'cfg');
 
-    cfg.children = [];
-    cfg.url = '';
+    if (cfg) {
+      cfg.children = [];
+      cfg.url = '';
+    }
   }
 
   const onOpenSearch = () => {
