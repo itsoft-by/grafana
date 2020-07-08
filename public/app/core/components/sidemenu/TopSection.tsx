@@ -19,7 +19,7 @@ const TopSection: FC<any> = () => {
 
     if (cfg) {
       cfg.children = [];
-      cfg.url = '';
+      cfg.url = 'http://localhost:8080/';
     }
   }
 
