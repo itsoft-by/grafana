@@ -276,6 +276,26 @@ class DashNav extends PureComponent<Props> {
     return buttons;
   }
 
+  exportToPdf = () => {
+    const { dashboard } = this.props;
+    const vm = {
+      panelIds: dashboard.panels.filter(x => x.type !== 'row').map(x => x.id), // get only panel ids
+      variables: collectDashboardVariables(),
+      uid: dashboard.uid,
+      refresh: dashboard.refresh,
+      from: dashboard.time.from,
+      to: dashboard.time.to,
+    };
+
+    fetch('http://localhost/health-monitor/api/pdf/render', {
+      method: 'POST',
+      body: JSON.stringify(vm),
+      headers: { 'Content-Type': 'application/json' },
+    }).then(resp => {
+      //download pdf
+      console.log(resp);
+    });
+  };
   render() {
     const { dashboard, location, isFullscreen } = this.props;
 
@@ -313,6 +333,10 @@ class DashNav extends PureComponent<Props> {
           <DashNavButton tooltip="Cycle view mode" classSuffix="tv" icon="monitor" onClick={this.onToggleTVMode} />
         </div>
 
+        <div className="navbar-buttons navbar-buttons--tv">
+          <DashNavButton tooltip="Export to pdf" classSuffix="tv" icon="save" onClick={this.exportToPdf} />
+        </div>
+
         {!dashboard.timepicker.hidden && (
           <div className="navbar-buttons">
             <DashNavTimeControls dashboard={dashboard} location={location} updateLocation={updateLocation} />
@@ -322,6 +346,19 @@ class DashNav extends PureComponent<Props> {
     );
   }
 }
+
+const collectDashboardVariables = (): any => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const variables: any = {};
+
+  for (const [key, value] of urlParams.entries()) {
+    if (key.startsWith('var-')) {
+      variables[key] = value;
+    }
+  }
+
+  return variables;
+};
 
 const mapStateToProps = (state: StoreState) => ({
   location: state.location,
