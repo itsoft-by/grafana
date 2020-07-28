@@ -18,6 +18,10 @@ import { DashboardModel } from '../../state';
 import { CoreEvents, StoreState } from 'app/types';
 import { ShareModal } from 'app/features/dashboard/components/ShareModal';
 import { SaveDashboardModalProxy } from 'app/features/dashboard/components/SaveDashboard/SaveDashboardModalProxy';
+// Constants
+import { HM_BACK_URL } from 'app/const/health-monitor';
+
+import { contextSrv } from 'app/core/services/context_srv';
 
 export interface OwnProps {
   dashboard: DashboardModel;
@@ -31,6 +35,11 @@ interface DashNavButtonModel {
   show: (props: Props) => boolean;
   component: FC<Partial<Props>>;
   index?: number | 'end';
+}
+
+interface KeyValuePair<T, T1> {
+  key: T;
+  value: T1;
 }
 
 const customLeftActions: DashNavButtonModel[] = [];
@@ -280,21 +289,38 @@ class DashNav extends PureComponent<Props> {
     const { dashboard } = this.props;
     const vm = {
       panelIds: dashboard.panels.filter(x => x.type !== 'row').map(x => x.id), // get only panel ids
-      variables: collectDashboardVariables(),
+      variables: collectDashboardVariables(dashboard.getVariables()),
       uid: dashboard.uid,
       refresh: dashboard.refresh,
       from: dashboard.time.from,
       to: dashboard.time.to,
+      title: dashboard.title,
+      user: contextSrv.user.login,
     };
 
-    fetch('http://localhost/health-monitor/api/pdf/render', {
+    fetch(`${HM_BACK_URL}pdf/render`, {
       method: 'POST',
       body: JSON.stringify(vm),
       headers: { 'Content-Type': 'application/json' },
-    }).then(resp => {
-      //download pdf
-      console.log(resp);
-    });
+    })
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+
+        return Promise.reject(response);
+      })
+      .then(file => {
+        const blob = base64toBlob(file.fileContents, 'application/pdf');
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+
+        link.href = url;
+        link.setAttribute('download', file.fileDownloadName);
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode.removeChild(link);
+      });
   };
   render() {
     const { dashboard, location, isFullscreen } = this.props;
@@ -347,17 +373,39 @@ class DashNav extends PureComponent<Props> {
   }
 }
 
-const collectDashboardVariables = (): any => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const variables: any = {};
+const collectDashboardVariables = (dashboardVariables: any): Array<KeyValuePair<string, string[]>> => {
+  let result: Array<KeyValuePair<string, string[]>> = [];
 
-  for (const [key, value] of urlParams.entries()) {
-    if (key.startsWith('var-')) {
-      variables[key] = value;
+  dashboardVariables.forEach((x: any) => {
+    const value = typeof x.current.value === 'string' ? [x.current.value] : x.current.value;
+    const variable: KeyValuePair<string, string[]> = {
+      key: `var-${x.name}`,
+      value: value,
+    };
+
+    result.push(variable);
+  });
+
+  return result;
+};
+
+const base64toBlob = (b64Data: string, contentType: string = '', sliceSize: number = 512): Blob => {
+  const byteCharacters = atob(b64Data);
+  const byteArrays = [];
+
+  for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+    const slice = byteCharacters.slice(offset, offset + sliceSize);
+    const byteNumbers = new Array(slice.length);
+
+    for (let i = 0; i < slice.length; i++) {
+      byteNumbers[i] = slice.charCodeAt(i);
     }
+
+    const byteArray = new Uint8Array(byteNumbers);
+    byteArrays.push(byteArray);
   }
 
-  return variables;
+  return new Blob(byteArrays, { type: contentType });
 };
 
 const mapStateToProps = (state: StoreState) => ({
