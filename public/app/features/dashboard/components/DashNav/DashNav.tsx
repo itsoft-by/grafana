@@ -122,6 +122,43 @@ class DashNav extends PureComponent<Props> {
     });
   };
 
+  onExportToPdfClick = () => {
+    const { dashboard } = this.props;
+    const vm = {
+      panelIds: dashboard.panels.filter(x => x.type !== 'row').map(x => x.id), // get only panel ids
+      variables: collectDashboardVariables(dashboard.getVariables()),
+      uid: dashboard.uid,
+      refresh: dashboard.refresh,
+      from: dashboard.time.from,
+      to: dashboard.time.to,
+      title: dashboard.title,
+      user: contextSrv.user.login,
+    };
+
+    fetch(`${HM_BACK_URL}grafana/dashboard/render`, {
+      method: 'POST',
+      body: JSON.stringify(vm),
+      headers: { 'Content-Type': 'application/json' },
+    })
+      .then(response => {
+        if (response.ok) {
+          return response.blob();
+        }
+
+        return Promise.reject(response);
+      })
+      .then(blob => {
+        const url = window.URL.createObjectURL(new Blob([blob]));
+        const link = document.createElement('a');
+
+        link.href = url;
+        link.setAttribute('download', `${dashboard.title}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode.removeChild(link);
+      });
+  };
+
   addCustomContent(actions: DashNavButtonModel[], buttons: ReactNode[]) {
     actions.map((action, index) => {
       const Component = action.component;
@@ -285,43 +322,6 @@ class DashNav extends PureComponent<Props> {
     return buttons;
   }
 
-  exportToPdf = () => {
-    const { dashboard } = this.props;
-    const vm = {
-      panelIds: dashboard.panels.filter(x => x.type !== 'row').map(x => x.id), // get only panel ids
-      variables: collectDashboardVariables(dashboard.getVariables()),
-      uid: dashboard.uid,
-      refresh: dashboard.refresh,
-      from: dashboard.time.from,
-      to: dashboard.time.to,
-      title: dashboard.title,
-      user: contextSrv.user.login,
-    };
-
-    fetch(`${HM_BACK_URL}pdf/render`, {
-      method: 'POST',
-      body: JSON.stringify(vm),
-      headers: { 'Content-Type': 'application/json' },
-    })
-      .then(response => {
-        if (response.ok) {
-          return response.json();
-        }
-
-        return Promise.reject(response);
-      })
-      .then(file => {
-        const blob = base64toBlob(file.fileContents, 'application/pdf');
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-
-        link.href = url;
-        link.setAttribute('download', file.fileDownloadName);
-        document.body.appendChild(link);
-        link.click();
-        link.parentNode.removeChild(link);
-      });
-  };
   render() {
     const { dashboard, location, isFullscreen } = this.props;
 
@@ -360,7 +360,7 @@ class DashNav extends PureComponent<Props> {
         </div>
 
         <div className="navbar-buttons navbar-buttons--tv">
-          <DashNavButton tooltip="Export to pdf" classSuffix="tv" icon="save" onClick={this.exportToPdf} />
+          <DashNavButton tooltip="Export to pdf" classSuffix="tv" icon="save" onClick={this.onExportToPdfClick} />
         </div>
 
         {!dashboard.timepicker.hidden && (
@@ -373,7 +373,7 @@ class DashNav extends PureComponent<Props> {
   }
 }
 
-const collectDashboardVariables = (dashboardVariables: any): Array<KeyValuePair<string, string[]>> => {
+const collectDashboardVariables = (dashboardVariables: any[]): Array<KeyValuePair<string, string[]>> => {
   let result: Array<KeyValuePair<string, string[]>> = [];
 
   dashboardVariables.forEach((x: any) => {
@@ -387,25 +387,6 @@ const collectDashboardVariables = (dashboardVariables: any): Array<KeyValuePair<
   });
 
   return result;
-};
-
-const base64toBlob = (b64Data: string, contentType: string = '', sliceSize: number = 512): Blob => {
-  const byteCharacters = atob(b64Data);
-  const byteArrays = [];
-
-  for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-    const slice = byteCharacters.slice(offset, offset + sliceSize);
-    const byteNumbers = new Array(slice.length);
-
-    for (let i = 0; i < slice.length; i++) {
-      byteNumbers[i] = slice.charCodeAt(i);
-    }
-
-    const byteArray = new Uint8Array(byteNumbers);
-    byteArrays.push(byteArray);
-  }
-
-  return new Blob(byteArrays, { type: contentType });
 };
 
 const mapStateToProps = (state: StoreState) => ({
