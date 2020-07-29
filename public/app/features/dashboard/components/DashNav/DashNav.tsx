@@ -5,6 +5,7 @@ import { css } from 'emotion';
 // Utils & Services
 import { appEvents } from 'app/core/app_events';
 import { PlaylistSrv } from 'app/features/playlist/playlist_srv';
+import { contextSrv } from 'app/core/services/context_srv';
 // Components
 import { DashNavButton } from './DashNavButton';
 import { DashNavTimeControls } from './DashNavTimeControls';
@@ -20,8 +21,6 @@ import { ShareModal } from 'app/features/dashboard/components/ShareModal';
 import { SaveDashboardModalProxy } from 'app/features/dashboard/components/SaveDashboard/SaveDashboardModalProxy';
 // Constants
 import { HM_BACK_URL } from 'app/const/health-monitor';
-
-import { contextSrv } from 'app/core/services/context_srv';
 
 export interface OwnProps {
   dashboard: DashboardModel;
@@ -156,7 +155,8 @@ class DashNav extends PureComponent<Props> {
         document.body.appendChild(link);
         link.click();
         link.parentNode.removeChild(link);
-      });
+      })
+      .catch(() => alert('Error while export dashboard'));
   };
 
   addCustomContent(actions: DashNavButtonModel[], buttons: ReactNode[]) {
