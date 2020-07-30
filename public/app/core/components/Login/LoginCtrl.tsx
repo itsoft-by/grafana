@@ -116,7 +116,7 @@ export class LoginCtrl extends PureComponent<Props, State> {
         window.location.href = this.result.redirectUrl;
       }
     } else {
-      window.location.href = config.appSubUrl + '/';
+      window.location.href = config.appSubUrl + '/?search=open';
     }
   };
 
