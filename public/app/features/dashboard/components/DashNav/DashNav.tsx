@@ -123,13 +123,28 @@ class DashNav extends PureComponent<Props> {
 
   onExportToPdfClick = () => {
     const { dashboard } = this.props;
+    const panels = dashboard.panels
+      .filter(x => x.type !== 'row')
+      .map(x => {
+        return {
+          id: x.id,
+          gridPosition: {
+            height: x.gridPos.h,
+            width: x.gridPos.w,
+            x: x.gridPos.x,
+            y: x.gridPos.y,
+          },
+        };
+      });
     const vm = {
-      panelIds: dashboard.panels.filter(x => x.type !== 'row').map(x => x.id), // get only panel ids
+      panels: panels,
       variables: collectDashboardVariables(dashboard.getVariables()),
+      time: {
+        refresh: dashboard.refresh,
+        from: dashboard.time.from,
+        to: dashboard.time.to,
+      },
       uid: dashboard.uid,
-      refresh: dashboard.refresh,
-      from: dashboard.time.from,
-      to: dashboard.time.to,
       title: dashboard.title,
       user: contextSrv.user.login,
     };
@@ -360,7 +375,7 @@ class DashNav extends PureComponent<Props> {
         </div>
 
         <div className="navbar-buttons navbar-buttons--tv">
-          <DashNavButton tooltip="Export to pdf" classSuffix="tv" icon="save" onClick={this.onExportToPdfClick} />
+          <DashNavButton tooltip="Export to pdf" classSuffix="tv" icon="import" onClick={this.onExportToPdfClick} />
         </div>
 
         {!dashboard.timepicker.hidden && (
