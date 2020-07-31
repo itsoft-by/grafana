@@ -5,6 +5,7 @@ import { css } from 'emotion';
 // Utils & Services
 import { appEvents } from 'app/core/app_events';
 import { PlaylistSrv } from 'app/features/playlist/playlist_srv';
+import { contextSrv } from 'app/core/services/context_srv';
 // Components
 import { DashNavButton } from './DashNavButton';
 import { DashNavTimeControls } from './DashNavTimeControls';
@@ -18,6 +19,8 @@ import { DashboardModel } from '../../state';
 import { CoreEvents, StoreState } from 'app/types';
 import { ShareModal } from 'app/features/dashboard/components/ShareModal';
 import { SaveDashboardModalProxy } from 'app/features/dashboard/components/SaveDashboard/SaveDashboardModalProxy';
+// Constants
+import { HM_BACK_URL } from 'app/const/health-monitor';
 
 export interface OwnProps {
   dashboard: DashboardModel;
@@ -31,6 +34,11 @@ interface DashNavButtonModel {
   show: (props: Props) => boolean;
   component: FC<Partial<Props>>;
   index?: number | 'end';
+}
+
+interface KeyValuePair<T, T1> {
+  key: T;
+  value: T1;
 }
 
 const customLeftActions: DashNavButtonModel[] = [];
@@ -111,6 +119,59 @@ class DashNav extends PureComponent<Props> {
       query: { search: 'open' },
       partial: true,
     });
+  };
+
+  onExportToPdfClick = () => {
+    const { dashboard } = this.props;
+    const panels = dashboard.panels
+      .filter(x => x.type !== 'row')
+      .map(x => {
+        return {
+          id: x.id,
+          gridPosition: {
+            height: x.gridPos.h,
+            width: x.gridPos.w,
+            x: x.gridPos.x,
+            y: x.gridPos.y,
+          },
+        };
+      });
+    const vm = {
+      panels: panels,
+      variables: collectDashboardVariables(dashboard.getVariables()),
+      time: {
+        refresh: dashboard.refresh,
+        from: dashboard.time.from,
+        to: dashboard.time.to,
+      },
+      uid: dashboard.uid,
+      title: dashboard.title,
+      user: contextSrv.user.login,
+    };
+
+    fetch(`${HM_BACK_URL}grafana/dashboard/render`, {
+      method: 'POST',
+      body: JSON.stringify(vm),
+      headers: { 'Content-Type': 'application/json' },
+    })
+      .then(response => {
+        if (response.ok) {
+          return response.blob();
+        }
+
+        return Promise.reject(response);
+      })
+      .then(blob => {
+        const url = window.URL.createObjectURL(new Blob([blob]));
+        const link = document.createElement('a');
+
+        link.href = url;
+        link.setAttribute('download', `${dashboard.title}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode.removeChild(link);
+      })
+      .catch(() => alert('Error while export dashboard'));
   };
 
   addCustomContent(actions: DashNavButtonModel[], buttons: ReactNode[]) {
@@ -313,6 +374,10 @@ class DashNav extends PureComponent<Props> {
           <DashNavButton tooltip="Cycle view mode" classSuffix="tv" icon="monitor" onClick={this.onToggleTVMode} />
         </div>
 
+        <div className="navbar-buttons navbar-buttons--tv">
+          <DashNavButton tooltip="Export to pdf" classSuffix="tv" icon="import" onClick={this.onExportToPdfClick} />
+        </div>
+
         {!dashboard.timepicker.hidden && (
           <div className="navbar-buttons">
             <DashNavTimeControls dashboard={dashboard} location={location} updateLocation={updateLocation} />
@@ -322,6 +387,22 @@ class DashNav extends PureComponent<Props> {
     );
   }
 }
+
+const collectDashboardVariables = (dashboardVariables: any[]): Array<KeyValuePair<string, string[]>> => {
+  let result: Array<KeyValuePair<string, string[]>> = [];
+
+  dashboardVariables.forEach((x: any) => {
+    const value = typeof x.current.value === 'string' ? [x.current.value] : x.current.value;
+    const variable: KeyValuePair<string, string[]> = {
+      key: `var-${x.name}`,
+      value: value,
+    };
+
+    result.push(variable);
+  });
+
+  return result;
+};
 
 const mapStateToProps = (state: StoreState) => ({
   location: state.location,
