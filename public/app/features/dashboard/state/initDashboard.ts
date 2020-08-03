@@ -62,19 +62,20 @@ async function fetchDashboard(
       case DashboardRouteInfo.Home: {
         // load home dash
         const dashDTO: DashboardDTO = await backendSrv.get('/api/dashboards/home');
-
         // if user specified a custom home dashboard redirect to that
         if (dashDTO.redirectUri) {
           const newUrl = locationUtil.stripBaseFromUrl(dashDTO.redirectUri);
           dispatch(updateLocation({ path: newUrl, replace: true }));
           return null;
-        }
+        } else {
+          dispatch(updateLocation({ path: '/dashboards', replace: true }));
 
-        // disable some actions on the default home dashboard
-        dashDTO.meta.canSave = false;
-        dashDTO.meta.canShare = false;
-        dashDTO.meta.canStar = false;
-        return dashDTO;
+          // disable some actions on the default home dashboard
+          dashDTO.meta.canSave = false;
+          dashDTO.meta.canShare = false;
+          dashDTO.meta.canStar = false;
+          return dashDTO;
+        }
       }
       case DashboardRouteInfo.Normal: {
         // for old db routes we redirect
