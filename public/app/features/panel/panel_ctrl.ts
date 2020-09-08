@@ -5,6 +5,7 @@ import { Emitter } from 'app/core/utils/emitter';
 import { auto } from 'angular';
 import { AppEvent, PanelEvents, PanelPluginMeta, AngularPanelMenuItem } from '@grafana/data';
 import { DashboardModel } from '../dashboard/state';
+import { getThresholdValue } from 'app/threshold';
 
 export class PanelCtrl {
   panel: any;
@@ -99,6 +100,12 @@ export class PanelCtrl {
   }
 
   render(payload?: any) {
+    // apply thresholds by dashboard variables
+    this.panel.thresholds.forEach((x: any) => {
+      if (x.text.startsWith('$')) {
+        x.value = getThresholdValue(this.panel.replaceVariables, x.text);
+      }
+    });
     this.events.emit(PanelEvents.render, payload);
   }
 

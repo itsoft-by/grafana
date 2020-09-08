@@ -1,6 +1,8 @@
 import coreModule from 'app/core/core_module';
 import config from 'app/core/config';
 import tinycolor from 'tinycolor2';
+import { getThresholdValue } from 'app/threshold';
+
 export class ThresholdFormCtrl {
   panelCtrl: any;
   panel: any;
@@ -25,6 +27,7 @@ export class ThresholdFormCtrl {
 
   addThreshold() {
     this.panel.thresholds.push({
+      text: '',
       value: undefined,
       colorMode: 'critical',
       op: 'gt',
@@ -68,6 +71,14 @@ export class ThresholdFormCtrl {
         .setAlpha(0.6)
         .toRgbString();
     }
+    this.panelCtrl.render();
+  }
+
+  onChangeThresholdValue(index: number) {
+    this.panel.thresholds[index].value = getThresholdValue(
+      this.panel.replaceVariables,
+      this.panel.thresholds[index].text
+    );
     this.panelCtrl.render();
   }
 }
