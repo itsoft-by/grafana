@@ -6,18 +6,11 @@ import { Button, Form, Input, Field } from '@grafana/ui';
 import { css } from 'emotion';
 
 interface Props {
-  displayForgotPassword: boolean;
   onSubmit: (data: FormModel) => void;
   isLoggingIn: boolean;
   passwordHint: string;
   loginHint: string;
 }
-
-const forgottenPasswordStyles = css`
-  display: inline-block;
-  margin-top: 16px;
-  float: right;
-`;
 
 const wrapperStyles = css`
   width: 100%;
@@ -29,7 +22,7 @@ export const submitButton = css`
   width: 100%;
 `;
 
-export const LoginForm: FC<Props> = ({ displayForgotPassword, onSubmit, isLoggingIn, passwordHint, loginHint }) => {
+export const LoginForm: FC<Props> = ({ onSubmit, isLoggingIn, passwordHint, loginHint }) => {
   return (
     <div className={wrapperStyles}>
       <Form onSubmit={onSubmit} validateOn="onChange">
@@ -56,11 +49,6 @@ export const LoginForm: FC<Props> = ({ displayForgotPassword, onSubmit, isLoggin
             <Button aria-label={selectors.pages.Login.submit} className={submitButton} disabled={isLoggingIn}>
               {isLoggingIn ? 'Logging in...' : 'Log in'}
             </Button>
-            {displayForgotPassword && (
-              <a className={forgottenPasswordStyles} href="user/password/send-reset-email">
-                Forgot your password?
-              </a>
-            )}
           </>
         )}
       </Form>
