@@ -101,11 +101,13 @@ export class PanelCtrl {
 
   render(payload?: any) {
     // apply thresholds by dashboard variables
-    this.panel.thresholds.forEach((x: any) => {
-      if (x.text.startsWith('$')) {
-        x.value = getThresholdValue(this.panel.replaceVariables, x.text);
-      }
-    });
+    if (this.panel.thresholds) {
+      this.panel.thresholds.forEach((x: any) => {
+        if (x.text.startsWith('$')) {
+          x.value = getThresholdValue(this.panel.replaceVariables, x.text);
+        }
+      });
+    }
     this.events.emit(PanelEvents.render, payload);
   }
 
