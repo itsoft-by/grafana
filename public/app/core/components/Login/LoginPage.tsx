@@ -43,6 +43,7 @@ export const LoginPage: FC = () => {
                 <div className={`${loginStyles.loginInnerBox} ${isChangingPassword ? 'hidden' : ''}`} id="login-view">
                   {!disableLoginForm && (
                     <LoginForm
+                      displayForgotPassword={!(ldapEnabled || authProxyEnabled)}
                       onSubmit={login}
                       loginHint={loginHint}
                       passwordHint={passwordHint}
