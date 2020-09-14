@@ -20,10 +20,9 @@
           ></select>
         </div>
         <input
-          type="number"
-          ng-model="threshold.value"
+          ng-model="threshold.text"
+          ng-change="ctrl.onChangeThresholdValue($index)"
           class="gf-form-input width-8"
-          ng-change="ctrl.render()"
           placeholder="value"
           ng-disabled="ctrl.disabled"
         />
