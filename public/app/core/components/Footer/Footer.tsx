@@ -54,7 +54,8 @@ export const Footer: FC = React.memo(() => {
   return (
     <footer className="footer">
       <div className="text-center">
-        <ul>
+        11.0.7554.0
+        {/* <ul>
           {links.map(link => (
             <li key={link.text}>
               <a href={link.url} target={link.target} rel="noopener">
@@ -62,7 +63,7 @@ export const Footer: FC = React.memo(() => {
               </a>
             </li>
           ))}
-        </ul>
+        </ul> */}
       </div>
     </footer>
   );
