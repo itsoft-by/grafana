@@ -171,7 +171,7 @@ class DashNav extends PureComponent<Props> {
         link.click();
         link.parentNode.removeChild(link);
       })
-      .catch(() => alert('Error while export dashboard'));
+      .catch(() => alert('PDF export is available only in enterprise version'));
   };
 
   addCustomContent(actions: DashNavButtonModel[], buttons: ReactNode[]) {
