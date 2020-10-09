@@ -5,7 +5,7 @@ import { css } from 'emotion';
 // Utils & Services
 import { appEvents } from 'app/core/app_events';
 import { PlaylistSrv } from 'app/features/playlist/playlist_srv';
-import { contextSrv } from 'app/core/services/context_srv';
+// import { contextSrv } from 'app/core/services/context_srv';
 // Components
 import { DashNavButton } from './DashNavButton';
 import { DashNavTimeControls } from './DashNavTimeControls';
@@ -19,8 +19,6 @@ import { DashboardModel } from '../../state';
 import { CoreEvents, StoreState } from 'app/types';
 import { ShareModal } from 'app/features/dashboard/components/ShareModal';
 import { SaveDashboardModalProxy } from 'app/features/dashboard/components/SaveDashboard/SaveDashboardModalProxy';
-// Constants
-import { HM_BACK_URL } from 'app/const/health-monitor';
 
 export interface OwnProps {
   dashboard: DashboardModel;
@@ -36,10 +34,10 @@ interface DashNavButtonModel {
   index?: number | 'end';
 }
 
-interface KeyValuePair<T, T1> {
-  key: T;
-  value: T1;
-}
+// interface KeyValuePair<T, T1> {
+//   key: T;
+//   value: T1;
+// }
 
 const customLeftActions: DashNavButtonModel[] = [];
 const customRightActions: DashNavButtonModel[] = [];
@@ -122,56 +120,57 @@ class DashNav extends PureComponent<Props> {
   };
 
   onExportToPdfClick = () => {
-    const { dashboard } = this.props;
-    const panels = dashboard.panels
-      .filter(x => x.type !== 'row')
-      .map(x => {
-        return {
-          id: x.id,
-          gridPosition: {
-            height: x.gridPos.h,
-            width: x.gridPos.w,
-            x: x.gridPos.x,
-            y: x.gridPos.y,
-          },
-        };
-      });
-    const vm = {
-      panels: panels,
-      variables: collectDashboardVariables(dashboard.getVariables()),
-      time: {
-        refresh: dashboard.refresh,
-        from: dashboard.time.from,
-        to: dashboard.time.to,
-      },
-      uid: dashboard.uid,
-      title: dashboard.title,
-      user: contextSrv.user.login,
-    };
+    alert('PDF export is available only in enterprise version');
+    // const { dashboard } = this.props;
+    // const panels = dashboard.panels
+    //   .filter(x => x.type !== 'row')
+    //   .map(x => {
+    //     return {
+    //       id: x.id,
+    //       gridPosition: {
+    //         height: x.gridPos.h,
+    //         width: x.gridPos.w,
+    //         x: x.gridPos.x,
+    //         y: x.gridPos.y,
+    //       },
+    //     };
+    //   });
+    // const vm = {
+    //   panels: panels,
+    //   variables: collectDashboardVariables(dashboard.getVariables()),
+    //   time: {
+    //     refresh: dashboard.refresh,
+    //     from: dashboard.time.from,
+    //     to: dashboard.time.to,
+    //   },
+    //   uid: dashboard.uid,
+    //   title: dashboard.title,
+    //   user: contextSrv.user.login,
+    // };
 
-    fetch(`${HM_BACK_URL}grafana/dashboard/render`, {
-      method: 'POST',
-      body: JSON.stringify(vm),
-      headers: { 'Content-Type': 'application/json' },
-    })
-      .then(response => {
-        if (response.ok) {
-          return response.blob();
-        }
+    // fetch(`${HM_BACK_URL}grafana/dashboard/render`, {
+    //   method: 'POST',
+    //   body: JSON.stringify(vm),
+    //   headers: { 'Content-Type': 'application/json' },
+    // })
+    //   .then(response => {
+    //     if (response.ok) {
+    //       return response.blob();
+    //     }
 
-        return Promise.reject(response);
-      })
-      .then(blob => {
-        const url = window.URL.createObjectURL(new Blob([blob]));
-        const link = document.createElement('a');
+    //     return Promise.reject(response);
+    //   })
+    //   .then(blob => {
+    //     const url = window.URL.createObjectURL(new Blob([blob]));
+    //     const link = document.createElement('a');
 
-        link.href = url;
-        link.setAttribute('download', `${dashboard.title}.pdf`);
-        document.body.appendChild(link);
-        link.click();
-        link.parentNode.removeChild(link);
-      })
-      .catch(() => alert('Error while export dashboard'));
+    //     link.href = url;
+    //     link.setAttribute('download', `${dashboard.title}.pdf`);
+    //     document.body.appendChild(link);
+    //     link.click();
+    //     link.parentNode.removeChild(link);
+    //   })
+    //   .catch(() => alert('Error while export dashboard'));
   };
 
   addCustomContent(actions: DashNavButtonModel[], buttons: ReactNode[]) {
@@ -388,21 +387,21 @@ class DashNav extends PureComponent<Props> {
   }
 }
 
-const collectDashboardVariables = (dashboardVariables: any[]): Array<KeyValuePair<string, string[]>> => {
-  let result: Array<KeyValuePair<string, string[]>> = [];
+// const collectDashboardVariables = (dashboardVariables: any[]): Array<KeyValuePair<string, string[]>> => {
+//   let result: Array<KeyValuePair<string, string[]>> = [];
 
-  dashboardVariables.forEach((x: any) => {
-    const value = typeof x.current.value === 'string' ? [x.current.value] : x.current.value;
-    const variable: KeyValuePair<string, string[]> = {
-      key: `var-${x.name}`,
-      value: value,
-    };
+//   dashboardVariables.forEach((x: any) => {
+//     const value = typeof x.current.value === 'string' ? [x.current.value] : x.current.value;
+//     const variable: KeyValuePair<string, string[]> = {
+//       key: `var-${x.name}`,
+//       value: value,
+//     };
 
-    result.push(variable);
-  });
+//     result.push(variable);
+//   });
 
-  return result;
-};
+//   return result;
+// };
 
 const mapStateToProps = (state: StoreState) => ({
   location: state.location,
