@@ -4,7 +4,7 @@ import TopSectionItem from './TopSectionItem';
 import config from '../../config';
 import { getLocationSrv } from '@grafana/runtime';
 import { contextSrv } from 'app/core/services/context_srv';
-import { HM_FRONT_URL } from 'app/const/health-monitor';
+// import { HM_FRONT_URL } from 'app/const/health-monitor';
 
 const TopSection: FC<any> = () => {
   const excludeNavItemIds = ['create', 'dashboards', 'explore', 'alerting', 'admin'];
@@ -20,7 +20,7 @@ const TopSection: FC<any> = () => {
 
     if (cfg) {
       cfg.children = [];
-      cfg.url = HM_FRONT_URL;
+      cfg.url = window.location.protocol + '//' + window.location.hostname + ':5000';
     }
   }
 
