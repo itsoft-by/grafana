@@ -19,8 +19,6 @@ import { DashboardModel } from '../../state';
 import { CoreEvents, StoreState } from 'app/types';
 import { ShareModal } from 'app/features/dashboard/components/ShareModal';
 import { SaveDashboardModalProxy } from 'app/features/dashboard/components/SaveDashboard/SaveDashboardModalProxy';
-// Constants
-// import { HM_BACK_URL } from 'app/const/health-monitor';
 
 export interface OwnProps {
   dashboard: DashboardModel;
