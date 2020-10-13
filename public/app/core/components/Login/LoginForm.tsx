@@ -35,12 +35,12 @@ export const LoginForm: FC<Props> = ({ displayForgotPassword, onSubmit, isLoggin
       <Form onSubmit={onSubmit} validateOn="onChange">
         {({ register, errors }) => (
           <>
-            <Field label="Email or username" invalid={!!errors.user} error={errors.user?.message}>
+            <Field label="Username" invalid={!!errors.user} error={errors.user?.message}>
               <Input
                 autoFocus
                 name="user"
-                ref={register({ required: 'Email or username is required' })}
-                placeholder={loginHint}
+                ref={register({ required: 'Username is required' })}
+                placeholder="username"
                 aria-label={selectors.pages.Login.username}
               />
             </Field>
