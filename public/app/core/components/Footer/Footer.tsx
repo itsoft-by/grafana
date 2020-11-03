@@ -54,7 +54,7 @@ export const Footer: FC = React.memo(() => {
   return (
     <footer className="footer">
       <div className="text-center">
-        11.0.7554.0
+        11.0.7555.0
         {/* <ul>
           {links.map(link => (
             <li key={link.text}>
